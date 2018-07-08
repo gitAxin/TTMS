@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.tedu.ttms.team.dao.TeamDao">
+
+	<!-- 插入一个项目 -->
+	<insert	id="insertObject" parameterType="cn.tedu.ttms.team.entity.Team">
+		INSERT INTO tms_teams
+		(
+		id,
+		name,
+		projectId,
+		valid,
+		note,
+		createdTime,
+		modifiedTime,
+		createdUser,
+		modifiedUser)
+		VALUES
+		(
+		#{id},
+		#{name},
+		#{projectId},
+		#{valid},
+		#{note},
+		NOW(),
+		NOW(),
+		#{createdUser},
+		#{modifiedUser}
+		);
+	</insert>
+	
+	<!-- 查询所有项目 -->
+	<select id = "findObjects" resultType="cn.tedu.ttms.team.entity.Team">
+		SELECT * FROM tms_projects
+	</select>
+	
+	
+	<!-- 分页查询项目信息 -->
+	<select id ="findPageObject" resultType="map">
+		SELECT p.name projectName,t.*
+		FROM tms_projects p JOIN tms_teams t
+		ON p.id=t.projectId
+		<where>
+			<if	test="projectName!=null and projectName!=''">
+				p.name LIKE CONCAT("%",#{projectName},"%")			
+			</if>
+			<if	test="valid!=null">
+				and t.valid=#{valid}
+			</if>
+		</where>
+		ORDER BY t.createdTime desc 
+		LIMIT #{startIndex},#{pageSize};
+	</select>
+	
+	
+	<!-- 获得总记录数 -->
+	<select	id="getRowCount" resultType="java.lang.Integer">
+		SELECT count(*)
+		FROM tms_teams t JOIN tms_projects p
+		ON t.projectId=p.id
+		
+		<where>
+			<if	test="projectName!=null and projectName!=''">
+				p.name LIKE CONCAT("%",#{projectName},"%")			
+			</if>
+			<if	test="valid!=null">
+				and t.valid=#{valid}
+			</if>
+		</where>
+	</select>
+	
+	
+	<select id="getObjectById" resultType="cn.tedu.ttms.team.entity.Team"
+	parameterType="java.lang.Integer">
+		SELECT *
+		FROM tms_teams
+		WHERE id=#{id}
+	</select>
+	
+	
+	<update id="updateObject"
+		parameterType="cn.tedu.ttms.team.entity.Team">
+		UPDATE tms_teams
+		SET
+		name=#{name},
+		projectId=#{projectId},
+		valid=#{valid},
+		note=#{note},
+		modifiedTime=NOW(),
+		modifiedUser=#{modifiedUser}
+		WHERE id=#{id}
+	</update>
+
+
+	<!-- 根据id修改启用或禁用状态 -->
+	<update id="validById">
+	 UPDATE tms_teams
+	 SET valid=#{valid}
+	 WHERE id in
+	 <foreach collection="ids" open="(" close=")" separator="," item="item">
+	 	#{item}
+	 </foreach>
+	</update>
+	
+	
+	<!-- 查找所有的团名及团id -->
+	<select id="findNameAndId" resultType="map">
+		SELECT id,name
+		FROM tms_teams
+		WHERE valid=1
+	</select>
+</mapper>

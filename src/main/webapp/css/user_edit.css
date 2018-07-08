@@ -1,0 +1,24 @@
+.vali_pass_progress {
+  margin-top: 10px;
+  background-color: #efefef;
+  height: 10px;
+  border-radius: 5px;
+}
+.vali_pass_inner_progress {
+  display: block;
+  height: 100%;
+  background-color: transparent;
+  border-radius: 5px;
+  width: 100%;
+}
+
+.error {
+ background-color: red;
+}
+.middle {
+ background-color: yellow;
+}
+.strong {
+ background-color: blue;
+}
+</style>

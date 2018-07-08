@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.tedu.ttms.attachement.dao.AttachementDao">
+
+	<select id="findObjects" resultType="cn.tedu.ttms.attachement.entity.Attachement">
+		SELECT * FROM tms_attachements;	
+	</select>
+	
+	<insert id="insertObject">
+		INSERT INTO tms_attachements
+		(id,title,fileName,contentType,filePath,fileDisgest,athType,belongId,createdUser,createdTime,modifiedUser,modifiedTime)
+		VALUES
+		(#{id},#{title},#{fileName},#{contentType},#{filePath},#{fileDisgest},#{athType},#{belongId},#{createdUser},NOW(),#{modifiedUser},NOW())
+	</insert>
+	
+	<!-- 根据摘要查找信息 -->
+	<select id="findObjectByDisGest" resultType="java.lang.Integer">
+		SELECT COUNT(*)
+		FROM tms_attachements
+		WHERE fileDisgest=#{fileDisgest}
+	</select>
+	
+	
+	<!-- 根据id查找对象 -->
+	<select id="findObjectById" resultType="cn.tedu.ttms.attachement.entity.Attachement">
+		SELECT * FROM tms_attachements WHERE id=#{id}
+	</select>
+	
+
+</mapper>

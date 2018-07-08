@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.tedu.ttms.project.dao.ProjectDao">
+	<!-- 插入一个项目 -->
+	<insert	id="insertObject" parameterType="cn.tedu.ttms.project.entity.Project">
+		INSERT INTO tms_projects
+		(id,code,name,beginDate,endDate,valid,note,createdUser,modifiedUser,createdTime,modifiedTime)
+		VALUES
+		(#{id},#{code},#{name},#{beginDate},#{endDate},#{valid},#{note},#{createdUser},#{modifiedUser},NOW(),NOW());
+	</insert>
+	
+	<!-- 查询所有项目 -->
+	<select id = "findObjects" resultType="cn.tedu.ttms.project.entity.Project">
+		SELECT * FROM tms_projects
+	</select>
+	
+	
+	<!-- 分页查询项目信息 -->
+	<select id ="findPageObjects" resultType="cn.tedu.ttms.project.entity.Project">
+		SELECT * FROM tms_projects p
+		
+		<where>
+			<if	test="project.name!=null and project.name!=''">
+				p.name like CONCAT("%",#{project.name},"%")			
+			</if>
+			<if	test="project.valid!=null">
+				and p.valid=#{project.valid}
+			</if>
+		</where>
+		ORDER BY p.createdTime desc 
+		limit #{pageObject.startIndex},#{pageObject.pageSize};
+	</select>
+	
+	
+	<!-- 获得总记录数 -->
+	<select	id="getRowCount" resultType="java.lang.Integer">
+		SELECT count(*) FROM tms_projects p
+		
+		<where>
+			<if	test="project.name!=null and project.name!=''">
+				p.name like CONCAT("%",#{project.name},"%")			
+			</if>
+			<if	test="project.valid!=null">
+				and p.valid=#{project.valid}
+			</if>
+		</where>
+	</select>
+	
+	
+	<!-- 修改valid(启动,禁用)状态   -->
+	<update	id="validById">
+		update tms_projects
+		SET valid=#{valid}
+		WHERE id in
+		<foreach collection="ids" open="(" close=")" separator="," item="item">
+			#{item}
+		</foreach>
+	</update>
+	
+	
+	<!-- 修改项目信息   -->
+	<update id="updateObject" parameterType="cn.tedu.ttms.project.entity.Project">
+		update tms_projects
+		set
+		name=#{name},
+		code=#{code},
+		beginDate=#{beginDate},
+		endDate=#{endDate},
+		valid=#{valid},
+		note=#{note},
+		modifiedTime=NOW(),
+		modifiedUser=#{modifiedUser}
+		where id=#{id};
+	</update>
+	
+	<!-- 根据ID查询项目信息 -->
+	<select id="findObjectById" parameterType="java.lang.Integer" resultType="cn.tedu.ttms.project.entity.Project"> 
+		SELECT * from tms_projects where id=#{id}
+	</select>
+	
+	
+	
+	<!-- 查询状态是启用的项目的id和名字,通常是将id和名字显示在页面的select选项中
+		<select id="">
+			<option value="id1">name1</option>
+			<option value="id2">name2</option>
+		</select>
+	-->
+	
+	
+	<select id="findIdAndNames" resultType="map">
+		SELECT id,name
+		FROM tms_projects
+		WHERE valid=1
+	</select>
+
+</mapper>

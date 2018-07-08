@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.tedu.ttms.system.dao.UserDao">
+	
+	<!-- 根据用户名查存是否存在 -->
+	<select id="isExists" resultType="java.lang.Integer">
+		SELECT COUNT(*)
+		FROM sys_users
+		WHERE username=#{username}
+	</select>
+	
+	<!-- 根据用户名查询用户信息 -->
+	<select id="findObjectByName" resultType="cn.tedu.ttms.system.entity.User">
+		SELECT *
+		FROM sys_users
+		WHERE username=#{username}
+	</select>
+	
+	<!-- 查找所有用户信息 -->
+	<select id="findAllObject" resultType="cn.tedu.ttms.system.entity.User">
+		SELECT *
+		FROM sys_users
+	</select>	
+	
+	<!-- 分页查找用户信息 -->
+	<select id="findPageObject" resultType="cn.tedu.ttms.system.entity.User">
+		SELECT *
+		FROM sys_users u
+		<where>
+			<if test="user.username!=null and user.username!=''">
+				u.username LIKE CONCAT("%",#{user.username},"%")		
+			</if>
+			<if test="user.mobile!=null and user.mobile!=''">
+				and u.mobile LIKE CONCAT("%",#{user.mobile},"%")		
+			</if>
+			<if test="user.email!=null and user.email!=''">
+				and u.email LIKE CONCAT("%",#{user.email},"%")		
+			</if>
+		</where>
+		ORDER BY u.createdTime DESC
+		LIMIT #{page.startIndex},#{page.pageSize}
+	</select>
+	
+	<!-- 查询用户总记录 -->
+	<select id="getRowCount" resultType="java.lang.Integer">
+		SELECT COUNT(*)
+		FROM sys_users u
+		<where>
+			<if test="user.username!=null and user.username!=''">
+				u.username LIKE CONCAT("%",#{user.username},"%")		
+			</if>
+			<if test="user.mobile!=null and user.mobile!=''">
+				and u.mobile LIKE CONCAT("%",#{user.mobile},"%")		
+			</if>
+			<if test="user.email!=null and user.email!=''">
+				and u.email LIKE CONCAT("%",#{user.email},"%")		
+			</if>
+		</where>
+	</select>
+	
+	
+	<!-- 插入用户信息 -->
+	<insert id="insertObject" parameterType="cn.tedu.ttms.system.entity.User"
+	useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO sys_users
+		(username,password,salt,email,mobile,valid,createdTime,createdUser)
+		VALUES
+		(#{username},
+		#{password},
+		#{salt},
+		#{email},
+		#{mobile},
+		1,
+		NOW(),
+		#{createdUser}
+		)			
+	</insert>
+	
+	<select id="findObjectById" resultType="map" parameterType="java.lang.Integer">
+	SELECT u.username username,u.password password,u.email email,u.mobile mobile
+	FROM sys_users u
+	WHERE u.id=#{id}
+	</select>
+	
+	
+	<!-- 根据用户id修改用户信息 -->
+	<update id="updateObject" parameterType="cn.tedu.ttms.system.entity.User">
+		UPDATE sys_users
+		SET
+		username=#{username},
+		password=#{password},
+		salt=#{salt},
+		email=#{email},
+		mobile=#{mobile},
+		modifiedUser=#{modifiedUser},
+		modifiedTime=NOW()
+		WHERE id=#{id}
+	</update>
+	
+	<!-- 根据id修改禁用/启用状态 -->
+	<update id="validById">
+	UPDATE sys_users
+	SET valid=#{valid}
+	WHERE id=#{userId}
+	</update>
+	
+	
+</mapper>

@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.tedu.ttms.product.dao.ProductDao">
+	
+	<insert id="insertObject" parameterType="cn.tedu.ttms.product.entity.Product">
+		INSERT INTO tms_products
+		(code,name,teamId,exText,
+			<if test="state==1">
+				onlineDate,		
+			</if>
+		minQty,price,classId,nights,state,note,createdUser,createdTime)
+		VALUES
+		(#{code},
+		#{name},
+		#{teamId},
+		#{exText},
+			<if test="state==1">
+				NOW(),		
+			</if>
+		#{minQty},
+		#{price},
+		#{classId},
+		#{nights},
+		#{state},
+		#{note},
+		#{createdUser},
+		NOW()
+		)
+	</insert>
+				
+	<select id="findAllObjects" resultType="map">
+		SELECT p.*, c.name className,t.name teamName
+		FROM tms_products p LEFT JOIN tms_classes c ON p.classId=c.id
+		LEFT JOIN tms_teams t ON p.teamId=t.id
+	</select>
+
+
+	<!-- 查询分页信息 -->
+	<select id="findPageObjects" resultType="map">
+		SELECT p.*, c.name className,t.name teamName
+		FROM tms_products p LEFT JOIN tms_classes c ON p.classId=c.id
+		LEFT JOIN tms_teams t ON p.teamId=t.id
+		<where>
+			<if test="product.name!=null and product.name!=''"> 
+				p.name like CONCAT("%",#{product.name},"%")
+			</if>
+			<if test="product.state!=null">
+				and p.state=#{product.state}
+			</if>
+		</where>
+		limit #{page.startIndex},#{page.pageSize}
+	</select>
+
+
+
+	<!-- 获得总记录数 -->
+	
+	<select id="getRowCount" resultType="java.lang.Integer">
+		SELECT COUNT(*)
+		FROM tms_products p LEFT JOIN tms_classes c ON p.classId=c.id
+		LEFT JOIN tms_teams t ON p.teamId=t.id
+		<where>
+			<if	test="product.name!=null and product.name!=''">
+				p.name like CONCAT("%",#{product.name},"%")			
+			</if>
+			<if test="product.state!=null">
+				and p.state=#{product.state}
+			</if>
+		</where>
+	</select>
+	
+	
+	<!-- 根据id查询产品信息 -->
+	<select id="findObjectById" resultType="map"
+		parameterType="java.lang.Integer">
+		SELECT p.*,c.name typeName
+		FROM tms_products p, tms_classes c
+		WHERE p.classId=c.id
+		AND p.id=#{id}
+	</select>
+	
+	<!-- 根据id更新产品信息 -->
+	<update id="updateObject" parameterType="cn.tedu.ttms.product.entity.Product">
+		UPDATE tms_products
+		SET code=#{code},
+		name=#{name},
+		teamId=#{teamId},
+		exText=#{exText},
+			<if test="state==1">
+				onlineDate=NOW(),
+				offlineDate=null,
+						
+			</if>
+			<if test="state==2">
+				offlineDate=NOW(),		
+			</if>
+		minQty=#{minQty},
+		price=#{price},
+		classId=#{classId},
+		nights=#{nights},
+		state=#{state},
+		note=#{note},
+		modifiedUser=#{modifiedUser},
+		modifiedTime=NOW()
+		WHERE id=#{id}	
+	</update>
+	
+	<select id="findObjectOne" resultType="cn.tedu.ttms.product.entity.Product" 
+		parameterType="java.lang.Integer">
+		SELECT *
+		FROM tms_products
+		WHERE id=#{id}
+	</select>
+	
+	<!-- 根据id修改产品状态信息 
+	 -->
+	<update id="stateById">
+		UPDATE tms_products
+		SET state=#{state},
+			<if test="state==1">
+				onlineDate=NOW(),
+				offlineDate=null
+			</if>
+			<if test="state==2">
+				offlineDate=NOW()
+			</if>
+		WHERE id in
+		<foreach collection="ids" open="(" close=")" separator="," item="item">
+			#{item}
+		</foreach>
+	</update>
+	
+	
+	
+	
+
+</mapper>
